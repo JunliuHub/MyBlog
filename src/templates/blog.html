@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Flasky{% endblock %}
+{% block page_content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-8 col-xs-offset-2">
+                <div class="panel panel-default panel-width">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">博客列表</div>
+                    <div class="panel-body">
+                        <h1>{{ blog.title }}</h1>
+                        <p>{{ blog.body }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

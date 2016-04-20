@@ -2,19 +2,33 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block title %}Flasky{% endblock %}
-
 {% block page_content %}
-<div class="page-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-1 col-xs-offset-9">
+             <a class="btn btn-success" href="/blogs/new" role="button">创建新文章</a>
+                <p></p>
+            </div>
+        </div>
+    </div>
 
-        {% if name %}
-            <h2><a href="http://www.w3school.com.cn">{{ name }}</a></h2>
-
-
-        {% endif %}
- <h2><a href="/blogs/new">创建新文章</a></h2>
-
-    <p>the local date and time is {{ moment(current_time).format('LLL') }}.</p>
-    <p>that was {{ moment(current_time).fromNow(refresh=True) }}</p>
-</div>
-
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-10 col-xs-offset-1">
+                <div class="panel panel-default panel-width">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">博客列表</div>
+                    <!-- List group -->
+                    <ul class="list-group">
+                        {% for blog in blogs %}
+                        <li class="list-group-item">
+                            <a href="{{ url_for('blog',id=blog.id) }}"><h4><strong>{{ blog.title}}</strong></h4></a>
+                        <small>{{ moment(blog.timestamp).fromNow(refresh=True) }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

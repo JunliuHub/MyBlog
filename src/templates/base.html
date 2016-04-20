@@ -2,6 +2,11 @@
 
 {% block title %}Flasky{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" type="text/css">
+{% endblock %}
+
 
 {% block navbar %}
 <div class="navbar navbar-default" role="navigation">
@@ -16,11 +21,13 @@
             </button>
             <a class="navbar-brand" href="/">Flasky</a>
         </div>
+        {% block navbarContent %}
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="/">Home</a></li>
             </ul>
         </div>
+        {% endblock %}
     </div>
 </div>
 {% endblock %}
