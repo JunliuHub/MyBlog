@@ -1,13 +1,17 @@
 import os
+import bleach
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.moment import Moment
 from flask.ext.wtf import Form
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager
+from flask.ext.pagedown import PageDown
+from flask.ext.pagedown.fields import PageDownField
 from wtforms import StringField, SubmitField, TextAreaField
 from wtforms.validators import InputRequired
 from flask import Flask, render_template, session, redirect, url_for
 from datetime import datetime
+from markdown import markdown
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,6 +27,7 @@ bootstrap = Bootstrap(app)
 moment = Moment(app)
 db = SQLAlchemy(app)
 manager = Manager(app)
+pagedown = PageDown(app)
 
 
 class NameForm(Form):
@@ -32,8 +37,14 @@ class NameForm(Form):
 
 class NewBlogForm(Form):
     title = StringField('标题', validators=[InputRequired()])
-    body = TextAreaField('写点儿什么', validators=[InputRequired()])
+    body = PageDownField('写点儿什么', validators=[InputRequired()])
     submit = SubmitField('发表新文章')
+
+
+class EditBlogForm(Form):
+    title = StringField('标题', validators=[InputRequired()])
+    body = PageDownField('写点儿什么', validators=[InputRequired()])
+    submit = SubmitField('保存修改')
 
 
 class Blog(db.Model):
@@ -41,10 +52,22 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(64), unique=True)
     body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow())
 
     def __repr__(self):
-        return '<Blog %s>' %self.title
+        return '<Blog %s>' % self.title
+
+    @staticmethod
+    def on_changed_body(target, body, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i',
+                        'li', 'ol', 'pre', 'strong', 'ul', 'h1', 'h2', 'h3', 'p']
+        body_html = markdown(body, output_format='html')
+        cleaned_body_html = bleach.clean(body_html, tags=allowed_tags, strip=True)
+        target.body_html = bleach.linkify(cleaned_body_html)
+
+
+db.event.listen(Blog.body, 'set', Blog.on_changed_body)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -74,6 +97,19 @@ def new_blog():
 def blog(id):
     blog = Blog.query.get_or_404(id)
     return render_template('blog.html', blog=blog)
+
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_blog(id):
+    blog = Blog.query.get_or_404(id)
+    form = EditBlogForm()
+    if form.validate_on_submit():
+        blog.title = form.title.data
+        blog.body = form.body.data
+        return redirect(url_for('blog', id=blog.id))
+    form.title.data = blog.title
+    form.body.data = blog.body
+    return render_template('edit_blog.html', blog=blog, form=form)
 
 
 @app.errorhandler(404)
