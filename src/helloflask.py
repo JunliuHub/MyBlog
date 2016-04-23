@@ -47,6 +47,11 @@ class ContentForm(Form):
     submit = SubmitField('添加新内容')
 
 
+class EditContentForm(Form):
+    body = PageDownField('修改笔记？', validators=[InputRequired()])
+    submit = SubmitField('保存修改')
+
+
 class Blog(db.Model):
     __tablename__ = 'blogs'
     id = db.Column(db.Integer, primary_key=True)
@@ -110,6 +115,7 @@ def new_blog():
 def blog(id):
     content_form = ContentForm()
     blog = Blog.query.get_or_404(id)
+    session['id'] = blog.id
     if content_form.validate_on_submit():
         new_content = BlogContent(body=content_form.body.data,
                                   blog=blog,
@@ -130,6 +136,17 @@ def edit_blog(id):
     form.title.data = blog.title
     form.body.data = blog.body
     return render_template('edit_blog.html', blog=blog, form=form)
+
+
+@app.route('/edit/contents/<int:id>', methods=['GET', 'POST'])
+def edit_content(id):
+    content = BlogContent.query.get_or_404(id)
+    form = EditContentForm()
+    if form.validate_on_submit():
+        content.body = form.body.data
+        return redirect(url_for('blog', id=session.get('id')))
+    form.body.data = content.body
+    return render_template('edit_blog.html', content=content, form=form)
 
 
 @app.errorhandler(404)
