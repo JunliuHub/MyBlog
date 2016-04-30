@@ -39,3 +39,11 @@ class BlogContent(db.Model):
 
 db.event.listen(Blog.body, 'set', Blog.on_changed_body)
 db.event.listen(BlogContent.body, 'set', Blog.on_changed_body)
+
+class Site(db.Model):
+    __tablename__ = 'sites'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow())
+    number = db.Column(db.Integer, index=True)

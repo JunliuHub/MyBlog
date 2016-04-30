@@ -67,3 +67,5 @@ target/
 .gitignore~
 venv/
 .idea/
+migrations/
+data-dev.sqlite

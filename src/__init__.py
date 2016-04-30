@@ -22,6 +22,8 @@ def create_app(config_name):
     pagedown.init_app(app)
 
     from .main import main as main_blueprint
+    from .site import site as site_blueprint
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(site_blueprint)
 
     return app
