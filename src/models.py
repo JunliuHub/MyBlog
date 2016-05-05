@@ -47,3 +47,10 @@ class Site(db.Model):
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow())
     number = db.Column(db.Integer, index=True)
+
+
+class SearchWord(db.Model):
+    __tablename__ = 'search_words'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    number = db.Column(db.Integer, index=True)
